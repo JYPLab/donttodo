@@ -25,11 +25,15 @@ const Calibration = ({ onComplete }) => {
   ]);
   const [newLabel, setNewLabel] = useState("");
   const [newDesc, setNewDesc] = useState("");
-  const formRef = useRef(null);
+  const containerRef = useRef(null);
 
   const handleAdd = (e) => {
     e.preventDefault();
     if (!newLabel.trim()) return;
+    if (items.length >= 8) {
+      alert("항목은 최대 8개(기본 4개 + 추가 4개)까지만 관리할 수 있습니다.");
+      return;
+    }
     setItems([...items, {
       id: Date.now().toString(),
       label: newLabel,
@@ -42,8 +46,11 @@ const Calibration = ({ onComplete }) => {
     setNewDesc("");
 
     setTimeout(() => {
-      if (formRef.current) {
-        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      if (containerRef.current) {
+        containerRef.current.scrollTo({
+          top: containerRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
       }
     }, 100);
   };
@@ -51,8 +58,8 @@ const Calibration = ({ onComplete }) => {
   const handleRemove = (id) => setItems(items.filter(i => i.id !== id));
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col max-w-md mx-auto border-x border-muted/30 bg-background-dark p-6 overflow-y-auto z-20">
-      <h1 className="font-display font-black text-3xl text-ink uppercase mb-2 mt-8">내 시간의 가치</h1>
+    <div ref={containerRef} className="relative flex min-h-screen w-full flex-col max-w-md mx-auto border-x border-muted/30 bg-background-dark p-6 overflow-y-auto z-20">
+      <h1 className="font-mono font-black text-3xl text-ink uppercase mb-2 mt-8">내 시간의 가치</h1>
       <p className="font-mono text-xs text-muted mb-8">당신의 1시간은 얼마짜리입니까?</p>
 
       <div className="mb-8">
@@ -71,7 +78,7 @@ const Calibration = ({ onComplete }) => {
           {items.map(item => (
             <div key={item.id} className="flex justify-between items-center bg-surface border border-muted p-3">
               <div>
-                <span className="font-display font-bold text-white uppercase block">{item.label}</span>
+                <span className="font-mono font-bold text-white uppercase block">{item.label}</span>
                 <span className="font-mono text-[10px] text-muted block mt-1">
                   {item.desc}
                   {item.type === 'count' && (
@@ -86,8 +93,8 @@ const Calibration = ({ onComplete }) => {
           ))}
         </div>
 
-        <form ref={formRef} onSubmit={handleAdd} className="flex flex-col gap-2 p-4 border border-muted/30 bg-surface">
-          <span className="font-mono text-[10px] text-muted mb-2">새로운 항목 추가 (시간 단위)</span>
+        <form onSubmit={handleAdd} className="flex flex-col gap-2 p-4 border border-muted/30 bg-surface">
+          <span className="font-mono text-[10px] text-muted mb-2">새로운 항목 추가 (최대 4개 추가 가능)</span>
           <input
             type="text"
             value={newLabel}
@@ -109,7 +116,7 @@ const Calibration = ({ onComplete }) => {
       <div className="mt-auto pt-4 pb-4">
         <button
           onClick={() => onComplete(rate, items.map(i => ({ ...i, value: 0 })))}
-          className="w-full h-16 bg-ink text-black font-display font-bold text-xl uppercase tracking-widest hover:bg-white transition-colors border-2 border-transparent"
+          className="w-full h-16 bg-ink text-black font-mono font-bold text-xl uppercase tracking-widest hover:bg-white transition-colors border-2 border-transparent"
         >
           시작하기
         </button>
@@ -133,7 +140,7 @@ const Incinerator = ({ logs, setLogs, hourlyRate, onCalculate }) => {
     <div className="relative flex h-screen w-full flex-col overflow-hidden max-w-md mx-auto border-x border-muted/30">
       <div className="w-full bg-surface border-b border-muted z-10 p-4 pt-8 flex justify-between items-end">
         <div>
-          <h1 className="font-display font-bold text-2xl tracking-tighter leading-none text-white">하지 말았어야<br />할 일들</h1>
+          <h1 className="font-mono font-bold text-2xl tracking-tighter leading-none text-white">하지 말았어야<br />할 일들</h1>
         </div>
         <div className="font-mono text-right text-ink">
           <div className="text-[10px] text-muted mb-1 uppercase tracking-widest">내 시급</div>
@@ -149,7 +156,7 @@ const Incinerator = ({ logs, setLogs, hourlyRate, onCalculate }) => {
           return (
             <div key={log.id} className="group relative">
               <div className="flex justify-between items-baseline mb-1">
-                <label className="font-display font-bold text-base text-white">{log.label}</label>
+                <label className="font-mono font-bold text-base text-white">{log.label}</label>
                 <span className={`font-mono text-sm ${cost > 0 ? 'text-ink' : 'text-muted'}`}>
                   <Currency amount={cost} />
                 </span>
@@ -202,7 +209,7 @@ const Incinerator = ({ logs, setLogs, hourlyRate, onCalculate }) => {
         </div>
         <button
           onClick={() => onCalculate({ totalLoss })}
-          className="w-full h-14 bg-white text-black font-display font-bold text-lg hover:bg-ink transition-colors"
+          className="w-full h-14 bg-white text-black font-mono font-bold text-lg hover:bg-ink transition-colors"
         >
           손실 확정
         </button>
@@ -240,7 +247,7 @@ const Ledger = ({ hourlyRate, logs, reportData, onDismiss }) => {
         <div className="flex flex-col p-6 pb-2 text-paper-ink font-mono text-sm leading-relaxed tracking-tight relative z-20">
 
           <div className="text-center border-b-2 border-black pb-4 mb-4">
-            <h2 className="text-xl font-black uppercase tracking-widest font-display mb-1">가치 소각 계산서</h2>
+            <h2 className="text-xl font-black uppercase tracking-widest font-mono mb-1">가치 소각 계산서</h2>
             <p className="text-xs font-bold text-paper-ink/80">{dateStr}</p>
           </div>
 
@@ -274,7 +281,7 @@ const Ledger = ({ hourlyRate, logs, reportData, onDismiss }) => {
               <span className="font-bold text-xs tracking-wider text-muted/80 mb-1">
                 {periodLabels[period]}
               </span>
-              <span className="font-display text-3xl font-black tabular-nums tracking-tighter text-black text-right border-y-2 border-black py-2 mb-2">
+              <span className="font-mono text-3xl font-black tabular-nums tracking-tighter text-black text-right border-y-2 border-black py-2 mb-2">
                 <Currency amount={projectedLoss} />
               </span>
             </div>
@@ -289,14 +296,14 @@ const Ledger = ({ hourlyRate, logs, reportData, onDismiss }) => {
       <div className="w-full max-w-[380px] mt-6 flex flex-col gap-3">
         {/* Viral Requirement - Must be present */}
         <button
-          className="w-full h-14 flex items-center justify-center gap-2 bg-[#FF2A00] text-white font-display font-bold text-sm tracking-widest transition-opacity hover:opacity-90"
+          className="w-full h-14 flex items-center justify-center gap-2 bg-[#FF2A00] text-white font-mono font-bold text-sm tracking-widest transition-opacity hover:opacity-90"
         >
           <span className="material-symbols-outlined text-[18px]">ios_share</span>
           계산서 공유하기
         </button>
         <button
           onClick={onDismiss}
-          className="w-full h-14 flex items-center justify-center gap-2 bg-transparent border border-muted text-ink font-display font-bold text-sm tracking-widest hover:border-white transition-colors"
+          className="w-full h-14 flex items-center justify-center gap-2 bg-transparent border border-muted text-ink font-mono font-bold text-sm tracking-widest hover:border-white transition-colors"
         >
           처음으로 돌아가기
         </button>
