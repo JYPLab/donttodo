@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 // --- UI COMPONENTS ---
 const Currency = ({ amount, className = "" }) => {
@@ -25,6 +25,7 @@ const Calibration = ({ onComplete }) => {
   ]);
   const [newLabel, setNewLabel] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const formRef = useRef(null);
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -39,6 +40,12 @@ const Calibration = ({ onComplete }) => {
     }]);
     setNewLabel("");
     setNewDesc("");
+
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }, 100);
   };
 
   const handleRemove = (id) => setItems(items.filter(i => i.id !== id));
@@ -65,14 +72,21 @@ const Calibration = ({ onComplete }) => {
             <div key={item.id} className="flex justify-between items-center bg-surface border border-muted p-3">
               <div>
                 <span className="font-display font-bold text-white uppercase block">{item.label}</span>
-                <span className="font-mono text-[10px] text-muted block mt-1">{item.desc}</span>
+                <span className="font-mono text-[10px] text-muted block mt-1">
+                  {item.desc}
+                  {item.type === 'count' && (
+                    <span className="text-ink/80 ml-1">
+                      (1{item.format.split('/')[0]}당 {item.multiplier}분 차감)
+                    </span>
+                  )}
+                </span>
               </div>
               <button onClick={() => handleRemove(item.id)} className="text-muted hover:text-primary material-symbols-outlined text-lg">close</button>
             </div>
           ))}
         </div>
 
-        <form onSubmit={handleAdd} className="flex flex-col gap-2 p-4 border border-muted/30 bg-surface">
+        <form ref={formRef} onSubmit={handleAdd} className="flex flex-col gap-2 p-4 border border-muted/30 bg-surface">
           <span className="font-mono text-[10px] text-muted mb-2">새로운 항목 추가 (시간 단위)</span>
           <input
             type="text"
@@ -141,7 +155,14 @@ const Incinerator = ({ logs, setLogs, hourlyRate, onCalculate }) => {
                 </span>
               </div>
 
-              <div className="text-[10px] text-primary mb-3 font-mono">{log.desc}</div>
+              <div className="text-[10px] text-primary mb-3 font-mono">
+                {log.desc}
+                {log.type === 'count' && (
+                  <span className="opacity-70 ml-1">
+                    (1{log.format.split('/')[0]}당 {log.multiplier}분 차감)
+                  </span>
+                )}
+              </div>
 
               <div className="flex justify-between items-center text-[10px] text-muted font-mono mb-2 uppercase tracking-wider">
                 <span>{log.type === 'count' ? '수량 (횟수)' : '소요 시간'}</span>
