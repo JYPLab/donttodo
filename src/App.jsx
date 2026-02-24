@@ -223,6 +223,24 @@ const Ledger = ({ hourlyRate, logs, reportData, onDismiss }) => {
   const [period, setPeriod] = useState(1); // 1 = Today, 7 = Weekly, 30 = Monthly
   const { totalLoss } = reportData;
 
+  const handleShare = async () => {
+    const textStr = `오늘 나는 ${periodLabels[period].split(' ')[0]} ${projectedLoss.toLocaleString()}원의 가치를 소각했다. 당신의 1시간은 얼마짜리입니까?`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: '가치 소각 계산서',
+          text: textStr,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log('공유 취소됨', err);
+      }
+    } else {
+      navigator.clipboard.writeText(`${textStr}\n${window.location.href}`);
+      alert('클립보드에 결과가 복사되었습니다!');
+    }
+  };
+
   const projectedLoss = totalLoss * period;
   const now = new Date();
   const dateStr = now.toLocaleDateString('ko-KR');
@@ -234,7 +252,7 @@ const Ledger = ({ hourlyRate, logs, reportData, onDismiss }) => {
   };
 
   return (
-    <div className="relative flex min-h-[100dvh] w-full flex-col items-center justify-start bg-background-dark overflow-y-auto px-4 py-8">
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-start bg-background-dark px-4 py-8 overflow-y-auto">
 
       {/* Toggle View */}
       <div className="w-full max-w-[380px] bg-surface p-1 flex gap-1 mb-6 rounded-sm">
@@ -296,6 +314,7 @@ const Ledger = ({ hourlyRate, logs, reportData, onDismiss }) => {
       <div className="w-full max-w-[380px] mt-6 flex flex-col gap-3">
         {/* Viral Requirement - Must be present */}
         <button
+          onClick={handleShare}
           className="w-full h-14 flex items-center justify-center gap-2 bg-[#FF2A00] text-white font-mono font-bold text-sm tracking-widest transition-opacity hover:opacity-90"
         >
           <span className="material-symbols-outlined text-[18px]">ios_share</span>
